@@ -29,54 +29,68 @@
                class="image-preview"
                (click)="openImage(msg.image.url)" />
         </ng-container>
-
+        
         <ng-container *ngIf="msg.file">
-          <div class="file">
-            <a [href]="msg.file.url" target="_blank" download>
-              📎 {{ msg.file.name }} ({{ msg.file.size | number }} bytes)
-            </a>
+          <div class="file-attachment">
+            <i class="fas fa-file"></i>
+            <a [href]="msg.file.url" target="_blank" class="file-name">{{ msg.file.name }}</a>
           </div>
         </ng-container>
-
-        <div class="timestamp">
-          {{ msg.timestamp | date:'short' }}
+            <div class="timestamp">
+              {{ msg.timestamp | date:'short' }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="input-area">
-    <div class="upload-buttons">
-      <button (click)="imageInput.click()">📷</button>
-      <input #imageInput
-             type="file"
-             accept="image/*"
-             (change)="onImageUpload($event)"
-             style="display: none">
+    <div class="input-area">
+      <div class="message-form">
+        <button class="emoji-button" (click)="toggleEmojiPicker($event)">
+          <i class="far fa-smile"></i>
+        </button>
 
-      <button (click)="fileInput.click()">📎</button>
-      <input #fileInput
-             type="file"
-             (change)="onFileUpload($event)"
-             style="display: none">
+        <input type="text" 
+               [(ngModel)]="message" 
+               placeholder="Type a message..." 
+               (keyup.enter)="sendMessage()">
 
-      <button (click)="toggleEmojiPicker()">😊</button>
-    </div>
+        <div class="attachment-buttons">
+          <input #imageInput
+                 type="file"
+                 accept="image/*"
+                 (change)="onImageUpload($event)"
+                 style="display: none">
+          
+          <input #fileInput
+                 type="file"
+                 (change)="onFileUpload($event)"
+                 style="display: none">
 
-    <div class="message-input">
-      <input type="text"
-             [(ngModel)]="message"
-             (keyup.enter)="sendMessage()"
-             placeholder="Type a message...">
-      <button (click)="sendMessage()">Send</button>
-    </div>
+          <button class="attachment-button" (click)="imageInput.click()">
+            <i class="far fa-image"></i>
+          </button>
+          
+          <button class="attachment-button" (click)="fileInput.click()">
+            <i class="far fa-file"></i>
+          </button>
+        </div>
 
-    <div *ngIf="showEmojiPicker" class="emoji-picker" clickOutside (clickOutside)="showEmojiPicker = false">
-      <emoji-picker style="height: 300px;" (emoji-click)="onEmojiSelect($event)"></emoji-picker>
-    </div>
+        <button class="send-button" (click)="sendMessage()" [disabled]="!message.trim() && !isUploading">
+          <i class="far fa-paper-plane"></i>
+        </button>
+      </div>
 
-    <div *ngIf="isUploading" class="upload-progress">
-      Uploading...
+      <div class="emoji-picker-container" *ngIf="showEmojiPicker" (clickOutside)="hideEmojiPicker()">
+        <emoji-mart [darkMode]="false" 
+                   (emojiClick)="addEmoji($event)"
+                   [style]="{ width: '100%' }"
+                   title="Pick an emoji"></emoji-mart>
+      </div>
+
+      <div *ngIf="isUploading" class="upload-progress">
+        Uploading...
+      </div>
     </div>
   </div>
 </div>

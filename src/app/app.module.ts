@@ -12,9 +12,7 @@ import { UserListComponent } from './components/user-list/user-list.component';
 import { DatabaseStatusComponent } from './components/database-status/database-status.component';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { environment } from '../environments/environment';
-
-// Import emoji-picker element
-import 'emoji-picker-element';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
 
 @NgModule({
   declarations: [
@@ -27,6 +25,7 @@ import 'emoji-picker-element';
   imports: [
     BrowserModule,
     FormsModule,
+    PickerModule,
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideDatabase(() => getDatabase()),

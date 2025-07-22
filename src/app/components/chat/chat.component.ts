@@ -1,14 +1,15 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewChecked, OnChanges, SimpleChanges } from '@angular/core';
 import { Database, ref, push, onValue, query, orderByChild } from '@angular/fire/database';
 import { Storage, ref as storageRef, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { ChatUser } from '../../types/chat-types';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit, AfterViewChecked {
+export class ChatComponent implements OnInit, AfterViewChecked, OnChanges {
   @Input() currentUser!: ChatUser;
   @Input() selectedUser?: ChatUser;
   @ViewChild('fileInput') fileInput!: ElementRef;
@@ -50,67 +51,17 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     // Initial messages load will happen when a user is selected
   }
 
-  ngOnChanges() {
-    if (this.selectedUser && this.currentUser) {
-      this.listenToMessages();
-    } else {
-      this.messages = [];
-    }
+  hideEmojiPicker(): void {
+    this.showEmojiPicker = false;
   }
 
-  private getChatId(uid1: string, uid2: string): string {
-    // Create a consistent chat ID regardless of who initiated the chat
-    return [uid1, uid2].sort().join('_');
+  addEmoji(event: { emoji: { native: string } }): void {
+    const emoji = event.emoji.native;
+    this.message += emoji;
   }
 
-  private listenToMessages() {
-    if (!this.currentUser || !this.selectedUser) return;
-
-    const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
-    const messagesRef = ref(this.db, `chats/${chatId}/messages`);
-    const messagesQuery = query(messagesRef, orderByChild('timestamp'));
-    
-    onValue(messagesQuery, (snapshot) => {
-      const messages: any[] = [];
-      snapshot.forEach((childSnapshot) => {
-        messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
-      });
-      this.messages = messages;
-      
-      // Scroll to bottom when new messages arrive
-      if (messages.length > 0) {
-        this.shouldScrollToBottom = true;
-        setTimeout(() => this.scrollToBottom(), 100);
-      }
-    });
-  }
-
-  async sendMessage(additionalData = {}) {
-    if (!this.message && !additionalData) return;
-    if (!this.selectedUser) return;
-
-    try {
-      const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
-      const messageData = {
-        text: this.message,
-        sender: this.currentUser.uid,
-        receiver: this.selectedUser.uid,
-        senderName: this.currentUser.displayName || this.currentUser.name || 'User',
-        senderPhoto: this.currentUser.photoURL,
-        timestamp: Date.now(),
-        ...additionalData
-      };
-
-      await push(ref(this.db, `chats/${chatId}/messages`), messageData);
-      this.message = '';
-      this.showEmojiPicker = false;
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  }
-
-  async handleFileUpload(file: File, type: 'image' | 'file') {
-    if (!this.selectedUser) return;
+  private async handleUpload(file: File, type: 'image' | 'file'): Promise<void> {
+    if (!file || !this.selectedUser) return;
 
     try {
       this.isUploading = true;
@@ -138,38 +89,99 @@ export class ChatComponent implements OnInit, AfterViewChecked {
           size: file.size
         }
       });
-      
-      this.isUploading = false;
     } catch (error) {
       console.error(`Error uploading ${type}:`, error);
+    } finally {
       this.isUploading = false;
     }
   }
 
-  onImageUpload(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.handleFileUpload(file, 'image');
+  toggleEmojiPicker(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
     }
-  }
-
-  onFileUpload(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.handleFileUpload(file, 'file');
-    }
-  }
-
-  onEmojiSelect(event: any) {
-    const emoji = event.detail.unicode || event.detail.emoji;
-    this.message += emoji;
-  }
-
-  toggleEmojiPicker() {
     this.showEmojiPicker = !this.showEmojiPicker;
   }
 
-  openImage(url: string) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.selectedUser && this.currentUser) {
+      this.listenToMessages();
+    } else {
+      this.messages = [];
+    }
+  }
+
+  private getChatId(uid1: string, uid2: string): string {
+    return [uid1, uid2].sort().join('_');
+  }
+
+  private listenToMessages(): void {
+    if (!this.currentUser || !this.selectedUser) return;
+
+    const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
+    const messagesRef = ref(this.db, `chats/${chatId}/messages`);
+    const messagesQuery = query(messagesRef, orderByChild('timestamp'));
+    
+    onValue(messagesQuery, (snapshot) => {
+      const messages: any[] = [];
+      snapshot.forEach((childSnapshot) => {
+        messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
+      });
+      this.messages = messages;
+      
+      if (messages.length > 0) {
+        this.shouldScrollToBottom = true;
+        setTimeout(() => this.scrollToBottom(), 100);
+      }
+    });
+  }
+
+  async sendMessage(additionalData: Record<string, any> = {}): Promise<void> {
+    if (!this.message && !Object.keys(additionalData).length) return;
+    if (!this.selectedUser) return;
+
+    try {
+      const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
+      const messageData = {
+        text: this.message,
+        sender: this.currentUser.uid,
+        receiver: this.selectedUser.uid,
+        senderName: this.currentUser.displayName || this.currentUser.name || 'User',
+        senderPhoto: this.currentUser.photoURL,
+        timestamp: Date.now(),
+        ...additionalData
+      };
+
+      await push(ref(this.db, `chats/${chatId}/messages`), messageData);
+      this.message = '';
+      this.showEmojiPicker = false;
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }
+
+  onImageUpload(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.handleUpload(file, 'image');
+    }
+  }
+
+  onFileUpload(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.handleUpload(file, 'file');
+    }
+  }
+
+  onEmojiSelect(event: { detail: { unicode?: string; emoji?: string } }): void {
+    const emoji = event.detail.unicode || event.detail.emoji;
+    if (emoji) {
+      this.message += emoji;
+    }
+  }
+
+  openImage(url: string): void {
     window.open(url, '_blank');
   }
 }
