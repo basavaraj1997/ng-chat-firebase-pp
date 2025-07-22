@@ -28,5 +28,7 @@ jobs:
       - name: 🚀 Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages          # The branch the action will deploy to
-          folder: dist/chatng  # Adjust to match your Angular project folder in dist
+          token: ${{ secrets.GH_TOKEN }}
+          branch: gh-pages
+          folder: dist/chatng
+
