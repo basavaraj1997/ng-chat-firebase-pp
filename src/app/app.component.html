@@ -1,0 +1,35 @@
+<div class="container">
+  <ng-container *ngIf="loading">
+    <div class="loading">Loading...</div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading">
+    <div *ngIf="!isUser(user)" class="login-container">
+      <h1>Firebase Chat App</h1>
+      <button (click)="login()">Login with Google</button>
+      <div *ngIf="error" class="error">{{ error }}</div>
+    </div>
+
+    <div *ngIf="isUser(user)" class="chat-container">
+      <header>
+        <div class="user-info">
+          <img [src]="user.photoURL || ''" [alt]="user.displayName || user.name || 'User'" class="avatar">
+          <span>{{ user.displayName || user.name || 'User' }}</span>
+        </div>
+        <button (click)="logout()">Logout</button>
+      </header>
+
+      <app-database-status></app-database-status>
+      
+      <main>
+        <app-user-list 
+          [currentUser]="user" 
+          [users]="users">
+        </app-user-list>
+        <app-chat 
+          [currentUser]="user">
+        </app-chat>
+      </main>
+    </div>
+  </ng-container>
+</div>

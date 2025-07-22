@@ -1,0 +1,262 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  color: #333333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 1rem;
+  flex: 1;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+.message-input {
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+  background-color: #ffffff;
+}
+
+.message-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+  background-color: #f8f9fa;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #0084ff;
+  background-color: #fff;
+}
+
+.send-button {
+  padding: 0.8rem 1.5rem;
+  background-color: #0084ff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.send-button:hover {
+  background-color: #0073e6;
+}
+
+.message {
+  display: flex;
+  gap: 0.8rem;
+  max-width: 70%;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.message.sent {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.message.received {
+  margin-right: auto;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.message-content {
+  background-color: #f1f3f5;
+  padding: 1rem;
+  border-radius: 15px;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  max-width: calc(100% - 50px);
+}
+
+.sent .message-content {
+  background-color: #0084ff;
+  color: white;
+  border-top-right-radius: 4px;
+}
+
+.received .message-content {
+  background-color: #f1f3f5;
+  color: #2c3e50;
+  border-top-left-radius: 4px;
+}
+
+.message-text {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+.sent .message-time {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.message-content {
+  background-color: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: #333333;
+}
+
+.sent .message-content {
+  background-color: #0084ff;
+  color: #ffffff;
+}
+
+.sender-name {
+  font-size: 0.8em;
+  color: #666666;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+.text {
+  word-break: break-word;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.file a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.timestamp {
+  font-size: 0.7em;
+  opacity: 0.6;
+  margin-top: 0.2rem;
+}
+
+.input-area {
+  padding: 1rem;
+  background-color: #ffffff;
+  position: relative;
+  border-top: 1px solid #e5e5e5;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.upload-buttons button {
+  background-color: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.upload-buttons button:hover {
+  transform: scale(1.1);
+}
+
+.message-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.message-input input {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  background-color: #f8f8f8;
+  color: #333333;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.message-input input:focus {
+  outline: none;
+  border-color: #0084ff;
+  background-color: #ffffff;
+}
+
+.message-input button {
+  background-color: #0084ff;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.message-input button:hover {
+  background-color: #0066cc;
+}
+
+.emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  right: 1rem;
+  z-index: 1000;
+}
+
+.upload-progress {
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #646cff;
+  padding: 0.2rem 1rem;
+  border-radius: 4px;
+  font-size: 0.8em;
+}

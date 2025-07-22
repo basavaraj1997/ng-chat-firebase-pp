@@ -1,0 +1,71 @@
+<div class="chat">
+  <div class="messages">
+    <div *ngFor="let msg of messages" 
+         [class.sent]="msg.sender === currentUser.uid"
+         [class.received]="msg.sender !== currentUser.uid"
+         class="message">
+      <img [src]="msg.senderPhoto" [alt]="msg.senderName || msg.senderDisplayName || 'User'" class="avatar">
+      <div class="message-content">
+        <div class="sender-name">{{ msg.senderName || msg.senderDisplayName || 'User' }}</div>
+        
+        <ng-container *ngIf="msg.text">
+          <div class="text">{{ msg.text }}</div>
+        </ng-container>
+
+        <ng-container *ngIf="msg.image">
+          <img [src]="msg.image.url" 
+               [alt]="msg.image.name" 
+               class="image-preview"
+               (click)="openImage(msg.image.url)" />
+        </ng-container>
+
+        <ng-container *ngIf="msg.file">
+          <div class="file">
+            <a [href]="msg.file.url" target="_blank" download>
+              📎 {{ msg.file.name }} ({{ msg.file.size | number }} bytes)
+            </a>
+          </div>
+        </ng-container>
+
+        <div class="timestamp">
+          {{ msg.timestamp | date:'short' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="upload-buttons">
+      <button (click)="imageInput.click()">📷</button>
+      <input #imageInput
+             type="file"
+             accept="image/*"
+             (change)="onImageUpload($event)"
+             style="display: none">
+
+      <button (click)="fileInput.click()">📎</button>
+      <input #fileInput
+             type="file"
+             (change)="onFileUpload($event)"
+             style="display: none">
+
+      <button (click)="toggleEmojiPicker()">😊</button>
+    </div>
+
+    <div class="message-input">
+      <input type="text"
+             [(ngModel)]="message"
+             (keyup.enter)="sendMessage()"
+             placeholder="Type a message...">
+      <button (click)="sendMessage()">Send</button>
+    </div>
+
+    <div *ngIf="showEmojiPicker" class="emoji-picker" clickOutside (clickOutside)="showEmojiPicker = false">
+      <emoji-picker style="height: 300px;" (emoji-click)="onEmojiSelect($event)"></emoji-picker>
+    </div>
+
+    <div *ngIf="isUploading" class="upload-progress">
+      Uploading...
+    </div>
+  </div>
+</div>
