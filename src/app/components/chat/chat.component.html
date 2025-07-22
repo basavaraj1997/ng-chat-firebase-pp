@@ -1,12 +1,23 @@
 <div class="chat">
-  <div class="messages">
-    <div *ngFor="let msg of messages" 
-         [class.sent]="msg.sender === currentUser.uid"
-         [class.received]="msg.sender !== currentUser.uid"
-         class="message">
-      <img [src]="msg.senderPhoto" [alt]="msg.senderName || msg.senderDisplayName || 'User'" class="avatar">
-      <div class="message-content">
-        <div class="sender-name">{{ msg.senderName || msg.senderDisplayName || 'User' }}</div>
+  <div *ngIf="!selectedUser" class="no-chat-selected">
+    <p>Select a user to start chatting</p>
+  </div>
+
+  <div *ngIf="selectedUser" class="chat-container">
+    <div class="chat-header">
+      <img [src]="selectedUser.photoURL" [alt]="selectedUser.displayName || selectedUser.name || 'User'" class="avatar">
+      <span class="name">{{ selectedUser.displayName || selectedUser.name || 'User' }}</span>
+    </div>
+
+    <div class="messages-wrapper">
+      <div class="messages" #messagesContainer (scroll)="onScroll($event)">
+        <div *ngFor="let msg of messages" 
+             [class.sent]="msg.sender === currentUser.uid"
+             [class.received]="msg.sender !== currentUser.uid"
+             class="message">
+          <img [src]="msg.senderPhoto" [alt]="msg.senderName" class="avatar">
+          <div class="message-content">
+            <div class="sender-name">{{ msg.senderName }}</div>
         
         <ng-container *ngIf="msg.text">
           <div class="text">{{ msg.text }}</div>

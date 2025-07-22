@@ -24,20 +24,23 @@ export class DatabaseStatusComponent implements OnInit {
         return;
       }
 
-      const testRef = ref(this.db, '.info/connected');
+      // Test by trying to read the users node instead
+      const testRef = ref(this.db, 'users');
       const snapshot = await get(testRef);
       
-      if (snapshot.exists()) {
-        this.status = 'success';
-        this.message = 'Database connected successfully! ✅';
-      } else {
-        this.status = 'warning';
-        this.message = 'Database connection established but no data found';
-      }
+      // If we can read the reference, the connection is working
+      this.status = 'success';
+      this.message = 'Database connected successfully! ✅';
     } catch (error: any) {
       console.error('Database connection test failed:', error);
       this.status = 'error';
-      this.message = `Database connection failed: ${error.message}`;
+      if (error.code === 'PERMISSION_DENIED') {
+        this.message = 'Database connection failed: Authentication required';
+      } else if (error.code === 'NETWORK_ERROR') {
+        this.message = 'Database connection failed: Network error';
+      } else {
+        this.message = 'Database connection failed: Please check your Firebase configuration';
+      }
     }
   }
 

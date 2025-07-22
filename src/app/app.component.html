@@ -24,10 +24,12 @@
       <main>
         <app-user-list 
           [currentUser]="user" 
-          [users]="users">
+          [users]="users"
+          (userSelected)="onUserSelected($event)">
         </app-user-list>
         <app-chat 
-          [currentUser]="user">
+          [currentUser]="user"
+          [selectedUser]="selectedUser">
         </app-chat>
       </main>
     </div>

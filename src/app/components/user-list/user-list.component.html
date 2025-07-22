@@ -2,9 +2,13 @@
   <h3>Online Users</h3>
   
   <div class="users">
-    <div *ngFor="let user of getOtherUsers()" class="user">
+    <div *ngFor="let user of getOtherUsers()" 
+         class="user" 
+         [class.selected]="selectedUserId === user.uid"
+         (click)="selectUser(user)">
       <img [src]="user.photoURL" [alt]="user.displayName || user.name || 'User'" class="avatar">
       <span class="name">{{ user.displayName || user.name || 'User' }}</span>
+      <div class="status-dot" [class.online]="user.isOnline"></div>
     </div>
   </div>
 </div>

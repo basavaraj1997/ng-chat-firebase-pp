@@ -1,23 +1,45 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { Database, ref, push, onValue, query, orderByChild } from '@angular/fire/database';
 import { Storage, ref as storageRef, uploadBytes, getDownloadURL } from '@angular/fire/storage';
-import { User } from '@angular/fire/auth';
+import { ChatUser } from '../../types/chat-types';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit {
-  @Input() currentUser!: User;
+export class ChatComponent implements OnInit, AfterViewChecked {
+  @Input() currentUser!: ChatUser;
+  @Input() selectedUser?: ChatUser;
   @ViewChild('fileInput') fileInput!: ElementRef;
   @ViewChild('imageInput') imageInput!: ElementRef;
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   message = '';
   messages: any[] = [];
   showEmojiPicker = false;
   isUploading = false;
   uploadProgress: {[key: string]: number} = {};
+  private shouldScrollToBottom = true;
+
+  ngAfterViewChecked() {
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+    }
+  }
+
+  private scrollToBottom(): void {
+    try {
+      const element = this.messagesContainer.nativeElement;
+      element.scrollTop = element.scrollHeight;
+    } catch (err) { }
+  }
+
+  onScroll(event: any): void {
+    const element = event.target;
+    const atBottom = element.scrollHeight - element.scrollTop === element.clientHeight;
+    this.shouldScrollToBottom = atBottom;
+  }
 
   constructor(
     private db: Database,
@@ -25,11 +47,27 @@ export class ChatComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.listenToMessages();
+    // Initial messages load will happen when a user is selected
+  }
+
+  ngOnChanges() {
+    if (this.selectedUser && this.currentUser) {
+      this.listenToMessages();
+    } else {
+      this.messages = [];
+    }
+  }
+
+  private getChatId(uid1: string, uid2: string): string {
+    // Create a consistent chat ID regardless of who initiated the chat
+    return [uid1, uid2].sort().join('_');
   }
 
   private listenToMessages() {
-    const messagesRef = ref(this.db, 'messages');
+    if (!this.currentUser || !this.selectedUser) return;
+
+    const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
+    const messagesRef = ref(this.db, `chats/${chatId}/messages`);
     const messagesQuery = query(messagesRef, orderByChild('timestamp'));
     
     onValue(messagesQuery, (snapshot) => {
@@ -38,23 +76,32 @@ export class ChatComponent implements OnInit {
         messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
       });
       this.messages = messages;
+      
+      // Scroll to bottom when new messages arrive
+      if (messages.length > 0) {
+        this.shouldScrollToBottom = true;
+        setTimeout(() => this.scrollToBottom(), 100);
+      }
     });
   }
 
   async sendMessage(additionalData = {}) {
     if (!this.message && !additionalData) return;
+    if (!this.selectedUser) return;
 
     try {
+      const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
       const messageData = {
         text: this.message,
         sender: this.currentUser.uid,
-        senderName: this.currentUser.displayName,
+        receiver: this.selectedUser.uid,
+        senderName: this.currentUser.displayName || this.currentUser.name || 'User',
         senderPhoto: this.currentUser.photoURL,
         timestamp: Date.now(),
         ...additionalData
       };
 
-      await push(ref(this.db, 'messages'), messageData);
+      await push(ref(this.db, `chats/${chatId}/messages`), messageData);
       this.message = '';
       this.showEmojiPicker = false;
     } catch (error) {
@@ -63,11 +110,25 @@ export class ChatComponent implements OnInit {
   }
 
   async handleFileUpload(file: File, type: 'image' | 'file') {
+    if (!this.selectedUser) return;
+
     try {
       this.isUploading = true;
-      const fileRef = storageRef(this.storage, `${type}s/${Date.now()}_${file.name}`);
+      const timestamp = Date.now();
+      const chatId = this.getChatId(this.currentUser.uid, this.selectedUser.uid);
+      const fileName = `${timestamp}_${file.name}`;
+      const filePath = `chats/${chatId}/${type}s/${fileName}`;
+      const fileRef = storageRef(this.storage, filePath);
       
-      await uploadBytes(fileRef, file);
+      const metadata = {
+        contentType: file.type,
+        customMetadata: {
+          'uploadedBy': this.currentUser.uid,
+          'chatId': chatId
+        }
+      };
+      
+      await uploadBytes(fileRef, file, metadata);
       const downloadURL = await getDownloadURL(fileRef);
 
       await this.sendMessage({

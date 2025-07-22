@@ -13,6 +13,7 @@ export class AppComponent implements OnInit {
   users: ChatUser[] = [];
   loading = true;
   error: string | null = null;
+  selectedUser: ChatUser | undefined;
 
   // Type guard method
   isUser(user: ChatUser | null): user is ChatUser {
@@ -33,6 +34,10 @@ export class AppComponent implements OnInit {
       }
       this.loading = false;
     });
+  }
+
+  onUserSelected(user: ChatUser) {
+    this.selectedUser = user;
   }
 
   async login() {

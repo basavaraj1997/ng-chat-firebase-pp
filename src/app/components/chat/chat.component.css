@@ -11,6 +11,45 @@
   flex: 1;
 }
 
+.no-chat-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 1.1rem;
+  background-color: #f8f9fa;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  gap: 0.8rem;
+}
+
+.chat-header .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header .name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -18,18 +57,54 @@
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
+  scroll-behavior: smooth;
+  height: calc(100vh - 300px);
+  min-height: 0;
+  padding-bottom: 100px;
+}
+
+.messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.message-wrapper {
+  margin-bottom: 1rem;
 }
 
 .message-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
   background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  z-index: 10;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .message-form {
   display: flex;
   gap: 1rem;
   align-items: center;
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 input[type="text"] {
@@ -38,8 +113,16 @@ input[type="text"] {
   border: 1px solid #e9ecef;
   border-radius: 20px;
   font-size: 0.95rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
   background-color: #f8f9fa;
+  min-height: 24px;
+}
+
+input[type="text"]:focus {
+  border-color: #0084ff;
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.1);
 }
 
 input[type="text"]:focus {

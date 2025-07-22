@@ -38,12 +38,34 @@ h3 {
   border: 1px solid #e9ecef;
   text-decoration: none;
   color: #2c3e50;
+  cursor: pointer;
+  position: relative;
 }
 
 .user:hover {
   background-color: #e9ecef;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user.selected {
+  background-color: #e3f2fd;
+  border-color: #90caf9;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ddd;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.status-dot.online {
+  background-color: #4caf50;
 }
 
 .avatar {
